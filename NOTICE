@@ -1,0 +1,7 @@
+DooDL is MIT licensed (see LICENSE).
+
+It can use the following third-party software, which is installed separately:
+- SAM 2 / SAM 2.1 by Meta AI Research, Apache License 2.0, https://github.com/facebookresearch/sam2
+  Model weights are downloaded from Meta's servers on first use and are under the same license.
+- PyTorch (BSD-style), OpenCV (Apache-2.0), FastAPI (MIT), NumPy (BSD), FFmpeg (LGPL/GPL, system binary).
+- Bricolage Grotesque and Figtree fonts (SIL Open Font License 1.1), bundled in src/doodl/static/fonts with their license texts.

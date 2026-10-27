@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doodl"
+version = "0.1.0"
+description = "Interactive video object segmentation: outline an object once, track it through the whole clip with SAM 2.1."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["computer-vision", "video-object-segmentation", "sam2", "fastapi"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python-headless>=4.9",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "imageio-ffmpeg>=0.5",  # bundles an ffmpeg binary, so users need no separate install
+]
+
+[project.optional-dependencies]
+# SAM 2.1 itself (and PyTorch) are installed separately, see README. Keeping them
+# out of the core dependencies lets the UI, API and CPU baseline run anywhere.
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "httpx>=0.27",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "pillow>=10",
+    "playwright>=1.45",
+]
+
+[project.scripts]
+doodl = "doodl.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+doodl = ["static/**/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "RUF"]
+ignore = ["B008"]  # FastAPI's Depends()/File() defaults are intentional
+
+[tool.ruff.lint.isort]
+known-first-party = ["doodl", "helpers"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: tests that decode or encode real video (a few seconds each)",
+]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/doodl"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[tool.coverage.run]
+source = ["src/doodl"]
+omit = ["src/doodl/colab.py", "src/doodl/cli.py"]

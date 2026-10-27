@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DooDL</title>
+  <meta name="description" content="Outline an object once and track it through the whole video.">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <meta name="theme-color" content="#FDFDF9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="/" aria-label="DooDL, start over">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="img/logo-dark.png">
+        <img src="img/logo.png" alt="DooDL" width="187" height="44">
+      </picture>
+    </a>
+    <span class="grow"></span>
+    <button id="new-video" class="btn" type="button" hidden>New video</button>
+  </header>
+
+  <main id="workbench" class="workbench" data-phase="empty">
+    <section class="stage-col" aria-label="Video">
+      <div id="stage" class="stage" data-phase="empty">
+        <div id="dropzone" class="dropzone">
+          <div class="dz-copy">
+            <h1>Outline it once. We'll follow it through the whole clip.</h1>
+            <p id="limits" class="dz-limits">MP4, MOV, MKV or WebM.</p>
+            <div class="row">
+              <button id="choose" class="btn primary" type="button">Choose a video</button>
+              <button id="sample" class="btn ghost-light" type="button">Try a sample</button>
+            </div>
+            <p id="upload-note" class="note" role="status"></p>
+            <input id="file" type="file" accept="video/*,.mkv" hidden>
+          </div>
+          <svg class="dz-art" viewBox="0 0 320 260" aria-hidden="true" focusable="false">
+            <rect class="art-frame" x="10" y="10" width="300" height="240" rx="18"/>
+            <circle class="art-sun" cx="62" cy="58" r="14"/>
+            <path class="art-hill" d="M10 232 L10 196 L78 150 L130 190 L190 120 L310 214 L310 232 a18 18 0 0 1 -18 18 L28 250 a18 18 0 0 1 -18 -18 Z"/>
+            <path class="art-blob" d="M168 70 C206 54 252 78 254 122 C256 168 214 196 176 184 C138 172 130 92 168 70 Z"/>
+            <path class="art-ring" pathLength="100" d="M160 58 C206 36 266 70 266 124 C266 184 214 208 172 196 C122 182 112 82 160 58 Z">
+              <animate attributeName="d" begin="1.5s" dur="0.5s" fill="freeze" calcMode="spline" keySplines="0.2 0.9 0.3 1" keyTimes="0;1"
+                values="M160 58 C206 36 266 70 266 124 C266 184 214 208 172 196 C122 182 112 82 160 58 Z;M168 70 C206 54 252 78 254 122 C256 168 214 196 176 184 C138 172 130 92 168 70 Z"/>
+            </path>
+            <g class="art-handles">
+              <rect x="150" y="48" width="20" height="20" rx="5"/>
+              <rect x="244" y="172" width="20" height="20" rx="5"/>
+            </g>
+            <path class="art-cursor" d="M222 146 L222 188 L232 179 L240 197 L247 194 L239 176 L252 175 Z"/>
+          </svg>
+        </div>
+
+        <div id="viewport" class="viewport" hidden>
+          <img id="frame" alt="Current video frame" draggable="false">
+          <div id="layers" class="layers"></div>
+          <canvas id="ink" aria-label="Drawing area. Draw around an object with a pointer."></canvas>
+        </div>
+
+        <video id="result-video" controls loop playsinline hidden></video>
+
+        <div id="stage-progress" class="stage-progress" hidden>
+          <span id="stage-progress-text"></span>
+          <div class="bar-track"><span id="stage-progress-fill"></span></div>
+        </div>
+      </div>
+
+      <p id="hint" class="hint" role="status"></p>
+
+      <div id="timeline" class="timeline" hidden>
+        <div class="strip-wrap">
+          <div id="strip" class="strip" aria-hidden="true"></div>
+          <div id="marks" class="marks" aria-hidden="true"></div>
+          <input id="scrub" type="range" min="0" max="0" step="1" value="0" aria-label="Frame">
+        </div>
+        <p id="frame-label" class="frame-label"></p>
+      </div>
+    </section>
+
+    <aside class="panel" aria-label="Objects and tools">
+      <section>
+        <h2>Objects</h2>
+        <ul id="objects" class="objects"></ul>
+        <p id="objects-empty" class="muted">Nothing outlined yet. Draw around an object to add it.</p>
+      </section>
+
+      <section>
+        <h2>Tool</h2>
+        <fieldset class="tools">
+          <legend class="sr">Tool</legend>
+          <label><input type="radio" name="tool" value="outline" checked>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16c1-7 6-11 11-9 5 2 4 9 0 11-3 2-8 1-11-2z" stroke-dasharray="3 3"/><rect x="2.5" y="14" width="4" height="4" rx="1"/></svg>Outline</span></label>
+          <label><input type="radio" name="tool" value="add">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>Add point</span></label>
+          <label><input type="radio" name="tool" value="remove">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></svg>Remove point</span></label>
+        </fieldset>
+        <button id="undo" class="btn small" type="button" disabled>Undo last point</button>
+      </section>
+
+      <section class="foot">
+        <button id="track" class="btn primary wide" type="button" disabled>Track objects</button>
+
+        <div id="progress" hidden>
+          <p id="progress-text" class="muted"></p>
+          <div class="bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="progress-fill"></span></div>
+          <button id="cancel" class="btn small" type="button">Cancel</button>
+        </div>
+
+        <div id="result" hidden>
+          <p id="result-summary"></p>
+          <button id="fix" class="btn wide" type="button">Fix a frame</button>
+          <ul id="downloads" class="downloads"></ul>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" role="alert" hidden>
+    <span id="toast-text"></span>
+    <button id="toast-close" type="button" aria-label="Dismiss">Close</button>
+  </div>
+</body>
+</html>
