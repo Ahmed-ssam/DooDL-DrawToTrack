@@ -8,7 +8,11 @@ Interactive video object segmentation. Upload a clip, pick a frame, draw a rough
 
 Built on [SAM 2.1](https://github.com/facebookresearch/sam2) (Meta, Apache-2.0). Runs on a free Colab T4 or any CUDA GPU. A CPU-only baseline ships too, so the UI, API and tests work anywhere.
 
-![Editor with a loose outline snapped to the ball](docs/img/ui-outlined.png)
+<p align="center">
+  <img src="docs/img/demo.gif" alt="DooDL tracking an outlined subject through a video" width="300">
+  <br>
+  <a href="docs/img/demo.mp4">Watch the full-quality video</a>
+</p>
 
 > **Status.** Tested on a free Colab T4 with SAM 2.1 tiny: 296 frames tracked in about 2 minutes, peak GPU memory 0.76 GB.
 
