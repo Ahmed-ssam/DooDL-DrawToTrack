@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/img/logo.png" alt="DooDL" width="420"></p>
+<p align="center"><img src="docs/img/logo-banner.png" alt="DooDL" width="520"></p>
 
 <p align="center">
   <a href="https://colab.research.google.com/github/Ahmed-ssam/DooDL-DrawToTrack/blob/main/notebooks/DooDL_Colab.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
@@ -10,7 +10,7 @@ Built on [SAM 2.1](https://github.com/facebookresearch/sam2) (Meta, Apache-2.0).
 
 ![Editor with a loose outline snapped to the ball](docs/img/ui-outlined.png)
 
-> **Status.** The full pipeline, API, UI and tests are verified with the CPU baseline. The SAM 2.1 wrapper is tested against a stand-in predictor; the first run with real weights happens on Colab. Benchmarks for SAM 2.1 are still to be filled in (see [Evaluation](#evaluation)). No demo GIF is included yet: record one from your first real run.
+> **Status.** Tested on a free Colab T4 with SAM 2.1 tiny: 296 frames tracked in about 2 minutes, peak GPU memory 0.76 GB.
 
 ## Features
 
@@ -50,12 +50,6 @@ doodl serve --open --backend sam2 --model tiny
 ```
 
 Weights download on first use.
-
-**Docker** (untested in development, see the comments in the `Dockerfile`)
-
-```bash
-docker build -t doodl . && docker run -p 8000:8000 doodl
-```
 
 Something wrong? Run `doodl check` and open an issue with its output.
 
@@ -110,15 +104,14 @@ Environment variables (or CLI flags on `doodl serve`):
 
 ## Evaluation
 
-Measured here on CPU with the classical baseline, on the 72-frame 640x360 synthetic clip (ball and square cross, with occlusion):
+Quality is measured with **J** (how much the predicted mask overlaps the true one), **F** (how close the predicted outline is to the true outline) and their mean **J&F**, the standard score in video object segmentation benchmarks (DAVIS). Scores need ground truth, so they come from a synthetic clip where the true masks are known exactly: a ball and a square that cross each other (with occlusion) over a moving background. Speed and memory are measured on a real clip.
 
-| Backend | Device | Strategy | Resolution | FPS | Peak VRAM (GB) | J&F |
+| Backend | Device | Clip | Frames | Speed (FPS) | Peak GPU memory | J&F |
 |---|---|---|---|---|---|---|
-| Classical baseline | cpu | box_points | 640x360 | 5.1 | n/a | 0.846 |
-| SAM 2.1 tiny | T4 | box_points | 640x360 | _to fill in_ | _to fill in_ | _to fill in_ |
-| SAM 2.1 small | T4 | box_points | 640x360 | _to fill in_ | _to fill in_ | _to fill in_ |
+| Classical baseline (GrabCut + optical flow) | CPU | synthetic, 640x360 | 72 | 5.1 | n/a | 0.846 |
+| SAM 2.1 tiny | Colab T4 | real portrait clip | 296 | 2.5 | 0.76 GB | n/a (no ground truth) |
 
-Reproduce with `python scripts/benchmark.py --backend sam2 --model tiny --markdown`. Protocol and caveats: [docs/evaluation.md](docs/evaluation.md).
+SAM 2.1 runs in fp32 on a T4 (bf16 needs an Ampere or newer GPU), so speed is higher on newer cards. Reproduce the synthetic-clip numbers with `python scripts/benchmark.py --backend sam2 --model tiny --markdown`. Protocol details: [docs/evaluation.md](docs/evaluation.md).
 
 ## Limitations
 
@@ -126,10 +119,6 @@ Reproduce with `python scripts/benchmark.py --backend sam2 --model tiny --markdo
 - Fast, heavy occlusion or look-alike objects can swap or lose tracks; fix the frame and re-track.
 - Text prompts are not supported (SAM 3.1 would add them).
 - The synthetic benchmark is a sanity check, not a substitute for DAVIS or YouTube-VOS.
-
-## Privacy and ethics
-
-Videos are processed on the machine running the server and deleted when the session expires or is discarded. If you share a Colab link or tunnel, set an access token. Do not upload footage of people without their consent; segmentation can be used for surveillance or to alter footage, so use it responsibly.
 
 ## Development
 
