@@ -6,6 +6,6 @@
 
 **Run.** `python scripts/benchmark.py --backend sam2 --model tiny --strategy box_points --markdown`. Repeat for `--model small`, and for `--strategy mask` and `grabcut` to compare how outlines become prompts.
 
-**Results.** See the README table. Classical baseline: J&F 0.846 (ball 0.71, square 0.98) at about 5 FPS on CPU. SAM 2.1 numbers must be measured on a GPU and entered by hand.
+**Results.** See the README table. Classical baseline on the synthetic clip: J&F 0.846 (ball 0.71, square 0.98) at about 5 FPS on CPU. SAM 2.1 tiny on a Colab T4, real portrait clip (296 frames): 2.5 FPS, peak GPU memory 0.76 GB. J&F for SAM 2.1 on the synthetic clip is not recorded yet; run the command above on a GPU to add it.
 
 **Caveats.** One short synthetic clip is a sanity check. For a real claim, evaluate on DAVIS 2017 val (not yet wired into the script). Report GPU, precision and resolution with every number.
