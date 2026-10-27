@@ -15,8 +15,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-      - name: System packages
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Install
         run: pip install -e ".[dev]"
       - name: Lint
