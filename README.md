@@ -1,29 +1,24 @@
-<p align="center"><img src="docs/img/logo-banner.png" alt="DooDL" width="520"></p>
-
 <p align="center">
-  <a href="https://colab.research.google.com/github/Ahmed-ssam/DooDL-DrawToTrack/blob/main/notebooks/DooDL_Colab.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
+  <img src="docs/img/banner.svg" alt="DooDL. Outline it once, we'll follow it through the whole clip." width="100%">
 </p>
 
-Interactive video object segmentation. Upload a clip, pick a frame, draw a rough outline around each object, and DooDL returns a video where every object is precisely segmented through the whole clip, each in its own color.
-
-Built on [SAM 2.1](https://github.com/facebookresearch/sam2) (Meta, Apache-2.0). Runs on a free Colab T4 or any CUDA GPU. A CPU-only baseline ships too, so the UI, API and tests work anywhere.
+<p align="center">
+  <a href="https://colab.research.google.com/github/Ahmed-ssam/DooDL-DrawToTrack/blob/main/notebooks/DooDL_Colab.ipynb"><img src="docs/img/btn-colab.svg" alt="Open in Colab" height="46"></a>
+  &nbsp;
+  <a href="docs/img/demo.mp4"><img src="docs/img/btn-demo.svg" alt="Watch the demo" height="46"></a>
+</p>
 
 <p align="center">
   <img src="docs/img/demo.gif" alt="DooDL tracking an outlined subject through a video" width="300">
-  <br>
-  <a href="docs/img/demo.mp4">Watch the full-quality video</a>
 </p>
+
+Upload a clip, pick a frame, draw a rough outline around each object, and DooDL returns a video where every object is precisely segmented through the whole clip, each in its own color. Built on [SAM 2.1](https://github.com/facebookresearch/sam2) (Meta, Apache-2.0). Runs on a free Colab T4 or any CUDA GPU; a CPU-only baseline ships too, so the UI, API and tests work anywhere.
 
 > **Status.** Tested on a free Colab T4 with SAM 2.1 tiny: 296 frames tracked in about 2 minutes, peak GPU memory 0.76 GB.
 
-## Features
-
-- Draw a loose outline, or add positive/negative clicks to refine; the outline snaps to the object as you draw.
-- Several objects at once, each with its own color. Prompt each on any frame; tracking runs forward and backward from it.
-- Fix a bad frame: jump back, add clicks, re-track.
-- Exports: `overlay.mp4`, `cutout.mp4` (objects on black), `masks.zip` (per-frame label PNGs) and `annotations.json` (COCO-style RLE).
-- Safe defaults: upload size, duration, frame count and object limits; optional access token; sessions expire.
-- Model-agnostic backend interface, so SAM 3.1 or another model can be added later.
+<p align="center">
+  <img src="docs/img/features.svg" alt="Outline once. Many objects. Fix any frame. Four exports." width="100%">
+</p>
 
 ## Try it
 
@@ -108,12 +103,13 @@ Environment variables (or CLI flags on `doodl serve`):
 
 ## Evaluation
 
-Quality is measured with **J** (how much the predicted mask overlaps the true one), **F** (how close the predicted outline is to the true outline) and their mean **J&F**, the standard score in video object segmentation benchmarks (DAVIS). Scores need ground truth, so they come from a synthetic clip where the true masks are known exactly: a ball and a square that cross each other (with occlusion) over a moving background. Speed and memory are measured on a real clip.
+Quality is measured with **J** (how much the predicted mask overlaps the true one), **F** (how close the predicted outline is to the true outline) and their mean **J&F**, the standard score in video object segmentation benchmarks (DAVIS). Scores need ground truth, so they come from a synthetic clip where the true masks are known exactly: a ball and a square that cross each other (with occlusion) over a moving background. Speed and memory are measured on a real clip; speed drops as more objects are tracked.
 
 | Backend | Device | Clip | Frames | Speed (FPS) | Peak GPU memory | J&F |
 |---|---|---|---|---|---|---|
 | Classical baseline (GrabCut + optical flow) | CPU | synthetic, 640x360 | 72 | 5.1 | n/a | 0.846 |
 | SAM 2.1 tiny | Colab T4 | real portrait clip | 296 | 2.5 | 0.76 GB | n/a (no ground truth) |
+| SAM 2.1 tiny, 3 objects | Colab T4 | real portrait clip | 296 | 0.9 | 0.77 GB | n/a (no ground truth) |
 
 SAM 2.1 runs in fp32 on a T4 (bf16 needs an Ampere or newer GPU), so speed is higher on newer cards. Reproduce the synthetic-clip numbers with `python scripts/benchmark.py --backend sam2 --model tiny --markdown`. Protocol details: [docs/evaluation.md](docs/evaluation.md).
 
